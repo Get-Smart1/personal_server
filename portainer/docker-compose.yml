@@ -1,0 +1,31 @@
+version: '2'
+
+services:
+  portainer:
+    image:  portainer/portainer-ce:2.1.1
+    name: portainer
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks: 
+      - internal
+    labels:
+    - "traefik.docker.network=internal"  
+    - "traefik.enable=true"
+    - "traefik.http.routers.${SERVICE_NAME}HTTP.entrypoints=web"
+    - "traefik.http.routers.${SERVICE_NAME}HTTP.rule=Host(`${TRAEFIK_SUBDOMAIN}`)"
+    - "traefik.http.middlewares.route2https.redirectscheme.scheme=https"
+    - "traefik.http.routers.${SERVICE_NAME}HTTP.middlewares=route2https"
+    - "traefik.http.routers.${SERVICE_NAME}router0.rule=Host(`${TRAEFIK_SUBDOMAIN}`)"
+    - "traefik.http.routers.${SERVICE_NAME}router0.entrypoints=websecure"
+    - "traefik.http.routers.${SERVICE_NAME}router0.tls.certresolver=mytlschallenge"
+    - "traefik.http.services.${SERVICE_NAME}service.loadbalancer.server.port=9000"
+
+volumes:
+  portainer_data:
+networks:
+  internal: 
+    external:
+      name: internal
