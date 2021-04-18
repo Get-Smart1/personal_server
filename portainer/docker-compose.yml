@@ -11,6 +11,7 @@ services:
       - portainer_data:/data
     networks: 
       - internal
+      - web
     labels:
     - "traefik.docker.network=internal"  
     - "traefik.enable=true"
@@ -29,3 +30,6 @@ networks:
   internal: 
     external:
       name: internal
+  web: 
+    external: 
+      name: web
