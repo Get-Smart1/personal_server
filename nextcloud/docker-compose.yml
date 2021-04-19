@@ -6,12 +6,12 @@ services:
     restart: always 
     volumes: 
       - type: volume
-        source: data-mariadb
+        source: mariadb_data
         target: /var/lib/mysql
     environment:
         MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PW}
     networks: 
-      - internal
+      - nextcloud_net
   nextcloud: 
     build: ./build/
     depends_on: 
@@ -20,15 +20,16 @@ services:
     env_file: nextcloud.env
     volumes: 
       - type: volume
-        source: data-nextcloud
+        source: nextcloud_data
         target: /var/www/html
     networks: 
-      - internal
+      - traefik_net
       - web
+      - nextcloud_net
     environment: 
       - MYSQL_HOST=mariadb
     labels: 
-      - "traefik.docker.network=internal"
+      - "traefik.docker.network=traefik_net"
       - "traefik.enable=true"
       - "traefik.http.routers.${SERVICE_NAME}routerHTTP.entrypoints=web"
       - "traefik.http.routers.${SERVICE_NAME}routerHTTP.rule=Host(`${TRAEFIK_SUBDOMAIN}`)"
@@ -45,10 +46,11 @@ services:
     stdin_open: true
     tty: true
     networks: 
-      - internal
+      - nextcloud_net
       - web
+      - traefik_net
     labels:
-      - "traefik.docker.network=internal"
+      - "traefik.docker.network=traefik_net"
       - "traefik.enable=true"
       - "traefik.http.routers.${ONLY_OFFICE_SERVICE_NAME}routerHTTP.entrypoints=web"
       - "traefik.http.routers.${ONLY_OFFICE_SERVICE_NAME}routerHTTP.rule=Host(`${ONLY_OFFICE_DOMAIN}`)"
@@ -61,9 +63,9 @@ services:
 
 
 volumes: 
-  data-mariadb: 
+  mariadb_data: 
     driver: local
-  data-nextcloud: 
+  nextcloud_data: 
     driver: local
 
     
@@ -71,8 +73,10 @@ networks:
   web:
     driver: bridge
     name: web
-  internal: 
+  traefik_net: 
     driver: bridge
-    name: internal
+    name: traefik_net
+  nextcloud_net:
+    internal: true
 
 

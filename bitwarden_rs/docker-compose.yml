@@ -5,17 +5,17 @@ services:
     image: bitwardenrs/server:1.13.0
     restart: always
     networks: 
-      - internal
+      - traefik_net
     volumes: 
       - type: volume
-        source: data_bitwarden
+        source: bitwarden_data
         target: /data
     environment: 
       WEBSOCKET_ENABLED: 'true' # Required to use websocket
       SIGNUPS_ALLOWED: 'false'   # set to false to disable signups
       ADMIN_TOKEN: ${ADMIN_TOKEN}
     labels:
-      - "traefik.docker.network=internal"
+      - "traefik.docker.network=traefik_net"
       - "traefik.enable=true"
       - traefik.http.middlewares.redirect-https.redirectScheme.scheme=https
       - traefik.http.middlewares.redirect-https.redirectScheme.permanent=true
@@ -40,18 +40,14 @@ services:
       - traefik.http.routers.${SERVICE_NAME}-websocket-http.service=${SERVICE_NAME}-websocket
       - traefik.http.services.${SERVICE_NAME}-websocket.loadbalancer.server.port=3012
 
-
 volumes: 
-  data_bitwarden: 
+  bitwarden_data: 
     driver: local
 
     
 networks:
-  web:
-    driver: bridge
-    name: web
-  internal: 
-    driver: bridge
-    name: internal
+    traefik_net: 
+      driver: bridge
+      name: traefik_net
 
 

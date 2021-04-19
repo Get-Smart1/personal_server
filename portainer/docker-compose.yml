@@ -1,4 +1,4 @@
-version: '2'
+version: '3.7'
 
 services:
   portainer:
@@ -10,10 +10,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     networks: 
-      - internal
+      - traefik_net
       - web
     labels:
-    - "traefik.docker.network=internal"  
+    - "traefik.docker.network=traefik_net"  
     - "traefik.enable=true"
     - "traefik.http.routers.${SERVICE_NAME}HTTP.entrypoints=web"
     - "traefik.http.routers.${SERVICE_NAME}HTTP.rule=Host(`${TRAEFIK_SUBDOMAIN}`)"
@@ -26,10 +26,11 @@ services:
 
 volumes:
   portainer_data:
+
 networks:
-  internal: 
+  traefik_net: 
     external:
-      name: internal
+      name: traefik_net
   web: 
     external: 
       name: web

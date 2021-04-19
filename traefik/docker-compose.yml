@@ -18,10 +18,10 @@ services:
       - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
     networks:
       - web
-      - internal
+      - traefik_net
     volumes:
         - type: volume
-          source: data-traefik
+          source: traefik_data
           target: "/letsencrypt"
         - type: bind 
           source: /var/run/docker.sock
@@ -29,7 +29,7 @@ services:
 
 
 volumes: 
-  data-traefik:
+  traefik_data:
     driver: local
 
     
@@ -37,8 +37,8 @@ networks:
   web:
     driver: bridge
     name: web
-  internal: 
-    driver: bridge
-    name: internal
+  traefik_net: 
+    external:
+      name: traefik_net
 
 

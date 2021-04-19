@@ -6,10 +6,10 @@ services:
     restart: always
     volumes: 
       - type: volume
-        source: duplicatiConfig
+        source: config
         target: /config
-      - type: volume
-        source: backups
+      - type: bind
+        source: /var/lib/docker/volumes
         target: /backups
       - type: bind
         source: /var/lib/docker/volumes
@@ -19,7 +19,7 @@ services:
       - PUID=0
       - PGID=0
     labels:
-      - "traefik.docker.network=internal"
+      - "traefik.docker.network=traefik_net"
       - "traefik.enable=true"
       - "traefik.http.routers.${SERVICE_NAME}routerHTTP.entrypoints=web"
       - "traefik.http.routers.${SERVICE_NAME}routerHTTP.rule=Host(`${TRAEFIK_SUBDOMAIN}`)"
@@ -31,20 +31,16 @@ services:
       - "traefik.http.services.${SERVICE_NAME}service.loadbalancer.server.port=8200"
     networks: 
       - web
-      - internal
-
-
+      - traefik_net
 volumes: 
-  duplicatiConfig: {}
-  backups: {}
+  config: {}
 
-    
 networks:
   web:
     driver: bridge
     name: web
-  internal: 
+  traefik_net: 
     driver: bridge
-    name: internal
+    name: traefik_net
 
 
