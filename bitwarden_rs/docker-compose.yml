@@ -37,7 +37,7 @@ services:
       - traefik.http.routers.${SERVICE_NAME}-websocket-http.rule=Host(`${TRAEFIK_SUBDOMAIN}`) && Path(`/notifications/hub`)
       - traefik.http.routers.${SERVICE_NAME}-websocket-http.entrypoints=web
       - traefik.http.routers.${SERVICE_NAME}-websocket-http.middlewares=redirect-https
-      - traefik.http.routers.${SERVICE_NAME}-websocket-http.service=bitwarden-websocket
+      - traefik.http.routers.${SERVICE_NAME}-websocket-http.service=${SERVICE_NAME}-websocket
       - traefik.http.services.${SERVICE_NAME}-websocket.loadbalancer.server.port=3012
 
 
