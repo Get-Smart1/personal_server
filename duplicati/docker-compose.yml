@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   duplicati:
-    image: development-version-v2.0.5.114-2.0.5.114_canary_2021-03-10
+    image: linuxserver/duplicati:version-v2.0.5.1-2.0.5.1_beta_2020-01-18
     restart: always
     volumes: 
       - type: volume
