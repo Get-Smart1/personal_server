@@ -1,2 +1,1 @@
-**/*.env
-paperless/docker-compose.env
+/docker-compose.yml
