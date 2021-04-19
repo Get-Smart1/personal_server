@@ -1,0 +1,78 @@
+version: '3.7'
+
+services:
+  mariadb:
+    image: mariadb:10.4.8-bionic
+    restart: always 
+    volumes: 
+      - type: volume
+        source: data-mariadb
+        target: /var/lib/mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PW}
+    networks: 
+      - internal
+  nextcloud: 
+    build: ./build/
+    depends_on: 
+      - mariadb
+    restart: always
+    env_file: nextcloud.env
+    volumes: 
+      - type: volume
+        source: data-nextcloud
+        target: /var/www/html
+    networks: 
+      - internal
+      - web
+    environment: 
+      - MYSQL_HOST=mariadb
+    labels: 
+      - "traefik.docker.network=internal"
+      - "traefik.enable=true"
+      - "traefik.http.routers.${SERVICE_NAME}routerHTTP.entrypoints=web"
+      - "traefik.http.routers.${SERVICE_NAME}routerHTTP.rule=Host(`${TRAEFIK_SUBDOMAIN}`)"
+      - "traefik.http.middlewares.route2https.redirectscheme.scheme=https"
+      - "traefik.http.routers.${SERVICE_NAME}routerHTTP.middlewares=route2https"
+      - "traefik.http.routers.${SERVICE_NAME}router0.rule=Host(`${TRAEFIK_SUBDOMAIN}`)"
+      - "traefik.http.routers.${SERVICE_NAME}router0.entrypoints=websecure"
+      - "traefik.http.routers.${SERVICE_NAME}router0.tls.certresolver=mytlschallenge"
+      #- "traefik.http.services.${SERVICE_NAME}service.loadbalancer.server.port=8200"
+  onlyoffice: 
+    image: myonlyoffice:1.0.0
+    # build: ./build/onlyoffice/
+    restart: always
+    stdin_open: true
+    tty: true
+    networks: 
+      - internal
+      - web
+    labels:
+      - "traefik.docker.network=internal"
+      - "traefik.enable=true"
+      - "traefik.http.routers.${ONLY_OFFICE_SERVICE_NAME}routerHTTP.entrypoints=web"
+      - "traefik.http.routers.${ONLY_OFFICE_SERVICE_NAME}routerHTTP.rule=Host(`${ONLY_OFFICE_DOMAIN}`)"
+      - "traefik.http.middlewares.route2https.redirectscheme.scheme=https"
+      - "traefik.http.routers.${ONLY_OFFICE_SERVICE_NAME}routerHTTP.middlewares=route2https"
+      - "traefik.http.routers.${ONLY_OFFICE_SERVICE_NAME}router0.rule=Host(`${ONLY_OFFICE_DOMAIN}`)"
+      - "traefik.http.routers.${ONLY_OFFICE_SERVICE_NAME}router0.entrypoints=websecure"
+      - "traefik.http.routers.${ONLY_OFFICE_SERVICE_NAME}router0.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.${ONLY_OFFICE_SERVICE_NAME}service.loadbalancer.server.port=80"
+
+
+volumes: 
+  data-mariadb: 
+    driver: local
+  data-nextcloud: 
+    driver: local
+
+    
+networks:
+  web:
+    driver: bridge
+    name: web
+  internal: 
+    driver: bridge
+    name: internal
+
+
