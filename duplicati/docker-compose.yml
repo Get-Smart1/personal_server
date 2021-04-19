@@ -1,0 +1,50 @@
+version: '3.7'
+
+services:
+  duplicati:
+    image: development-version-v2.0.5.114-2.0.5.114_canary_2021-03-10
+    restart: always
+    volumes: 
+      - type: volume
+        source: duplicatiConfig
+        target: /config
+      - type: volume
+        source: backups
+        target: /backups
+      - type: bind
+        source: /var/lib/docker/volumes
+        target: /source
+    environment: 
+      - TZ=Europe/Berlin
+      - PUID=0
+      - PGID=0
+    labels:
+      - "traefik.docker.network=internal"
+      - "traefik.enable=true"
+      - "traefik.http.routers.${SERVICE_NAME}routerHTTP.entrypoints=web"
+      - "traefik.http.routers.${SERVICE_NAME}routerHTTP.rule=Host(`${TRAEFIK_SUBDOMAIN}`)"
+      - "traefik.http.middlewares.route2https.redirectscheme.scheme=https"
+      - "traefik.http.routers.${SERVICE_NAME}routerHTTP.middlewares=route2https"
+      - "traefik.http.routers.${SERVICE_NAME}router0.rule=Host(`${TRAEFIK_SUBDOMAIN}`)"
+      - "traefik.http.routers.${SERVICE_NAME}router0.entrypoints=websecure"
+      - "traefik.http.routers.${SERVICE_NAME}router0.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.${SERVICE_NAME}service.loadbalancer.server.port=8200"
+    networks: 
+      - web
+      - internal
+
+
+volumes: 
+  duplicatiConfig: {}
+  backups: {}
+
+    
+networks:
+  web:
+    driver: bridge
+    name: web
+  internal: 
+    driver: bridge
+    name: internal
+
+
